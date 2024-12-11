@@ -25,12 +25,6 @@ hold on;
 plot3(x1, y1, z1, 'b-', 'LineWidth', 2, 'DisplayName', 'accurate\_RK');
 plot3(x2, y2, z2, 'r--', 'LineWidth', 2, 'DisplayName', 'plotBaseballTrajectory');
 
-% Plot start and end points
-plot3(start_point(1), start_point(2), start_point(3), 'go', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'g', 'DisplayName', 'Start');
-plot3(end_point(1), end_point(2), end_point(3), 'ro', ...
-    'MarkerSize', 10, 'MarkerFaceColor', 'r', 'DisplayName', 'End');
-
 % Customize plot
 grid on;
 xlabel('X Position (ft)');
@@ -43,4 +37,3 @@ axis equal;
 
 % Display end points for comparison
 fprintf('accurate_RK end point: (%.3f, %.3f, %.3f)\n', x1(end), y1(end), z1(end));
-fprintf('plotBaseballTrajectory end point: (%.3f, %.3f, %.3f)\n', end_point(1), end_point(2), end_point(3));
