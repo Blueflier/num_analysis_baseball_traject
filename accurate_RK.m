@@ -1,83 +1,70 @@
-function [t, x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, Cd, CL, phi_spin, phi_mag, theta, g, K, dt, t_final)
-    % Time parameters
-    t_span = 0:dt:t_final;
-    n = length(t_span);
-
-    % Initialize solution arrays
-    sol = zeros(6, n);
-    sol(:,1) = [x0; y0; z0; vx0; vy0; vz0];
+function [x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi_spin)
+    % plotBaseballTrajectory - Calculates 3D baseball trajectory with aerodynamic effects
+    % using 4th order Runge-Kutta integration
+    %
+    % Inputs:
+    %   x0, y0, z0     - Initial positions (m)
+    %   vx0, vy0, vz0  - Initial velocities (m/s)
+    %   dt             - Time step (seconds)
+    %   t_final        - Final time (seconds)
+    %
+    % Outputs:
+    %   x, y, z        - Position arrays over time
     
-    % Convert spin parameters
-    omega = phi_mag * (2*pi/60);  % Convert RPM to rad/s
+    % Constants
+    g = 32.174;        % Gravity acceleration (ft/s^2)
     
-    % Air density (standard conditions)
-    rho = 1.225;  % kg/m^3
+    % Time array
+    t = 0:dt:t_final;
+    n = length(t);
     
-    % Baseball parameters
-    r = 0.037338;  % radius in meters (2.94 inches)
-    m = 0.145;     % mass in kg (5.11 oz)
+    % Initialize state vector [x1=x, x2=vx, x3=y, x4=vy, x5=z, x6=vz]
+    state = zeros(6, n);
+    state(:,1) = [x0; vx0; y0; vy0; z0; vz0];
     
     % RK4 integration
     for i = 1:n-1
-        k1 = derivatives(sol(:,i), Cd, CL, phi_spin, omega, theta, g, K, rho, r, m);
-        k2 = derivatives(sol(:,i) + dt*k1/2, Cd, CL, phi_spin, omega, theta, g, K, rho, r, m);
-        k3 = derivatives(sol(:,i) + dt*k2/2, Cd, CL, phi_spin, omega, theta, g, K, rho, r, m);
-        k4 = derivatives(sol(:,i) + dt*k3, Cd, CL, phi_spin, omega, theta, g, K, rho, r, m);
+        k1 = derivatives(state(:,i));
+        k2 = derivatives(state(:,i) + dt*k1/2);
+        k3 = derivatives(state(:,i) + dt*k2/2);
+        k4 = derivatives(state(:,i) + dt*k3);
         
-        sol(:,i+1) = sol(:,i) + (dt/6)*(k1 + 2*k2 + 2*k3 + k4);
+        state(:,i+1) = state(:,i) + (dt/6)*(k1 + 2*k2 + 2*k3 + k4);
     end
     
-    % Output results
-    t = t_span;
-    x = sol(1,:);
-    y = sol(2,:);
-    z = sol(3,:);
-end
+    % Extract positions for output
+    x = state(1,:);
+    y = state(3,:);
+    z = state(5,:);
 
-function dydt = derivatives(y, Cd, CL, phi_spin, omega, theta, g, K, rho, r, m)
-    % Extract current state
-    vx = y(4);
-    vy = y(5);
-    vz = y(6);
-    
-    % Calculate velocity magnitude
-    v = sqrt(vx^2 + vy^2 + vz^2);
-    
-    % Unit vectors
-    if v > 0
-        ev = [vx; vy; vz]/v;  % Velocity direction
-    else
-        ev = [0; 0; 0];
+    function dstate = derivatives(x)
+        % Helper function to compute derivatives for RK4
+        % x = [x1=x, x2=vx, x3=y, x4=vy, x5=z, x6=vz]
+        
+        % Calculate velocity magnitude
+        v = sqrt(x(2)^2 + x(4)^2 + x(6)^2);
+        
+        dstate = zeros(6,1);
+        
+        % Position derivatives
+        dstate(1) = x(2);        % dx/dt = vx
+        dstate(3) = x(4);        % dy/dt = vy
+        dstate(5) = x(6);        % dz/dt = vz
+        
+        if v > 0
+            % Velocity derivatives with aerodynamic effects
+            % dvx/dt: X-acceleration
+            dstate(2) = -K*Cd*v*x(2) - K*CL*v*x(4)*sin(phi_spin);
+            
+            % dvy/dt: Y-acceleration
+            dstate(4) = -K*Cd*v*x(4) + K*CL*v*(x(2)*sin(phi_spin) - x(6)*cos(phi_spin));
+            
+            % dvz/dt: Z-acceleration
+            dstate(6) = -K*Cd*v*x(6) + K*CL*v*x(4)*cos(phi_spin) - g;
+        else
+            dstate(2) = 0;
+            dstate(4) = 0;
+            dstate(6) = -g;
+        end
     end
-    
-    % Spin axis unit vector (using phi_spin and theta)
-    es = [cos(theta)*cos(phi_spin);
-          cos(theta)*sin(phi_spin);
-          sin(theta)];
-    
-    % Calculate forces
-    % Drag force
-    Fd = K * v^2;  % Drag force magnitude
-    F_drag = -Fd * ev;
-    
-    % Magnus force (spin effect)
-    S = (r * omega)/(v + eps);  % Spin parameter (eps prevents division by zero)
-    Cm = 1/(2 + S);  % Magnus coefficient
-    F_magnus = 0.5 * rho * (pi*r^2) * v^2 * Cm * cross(es, ev);
-    
-    % Lift force
-    FL = (CL/Cd) * Fd;
-    lift_dir = cross(ev, cross(es, ev));  % Lift direction
-    norm_lift = norm(lift_dir);
-    if norm_lift > 0
-        lift_dir = lift_dir/norm_lift;
-    end
-    F_lift = FL * lift_dir;
-    
-    % Sum all forces and calculate acceleration
-    F_total = F_drag + F_magnus + F_lift + [0; 0; -m*g];
-    acc = F_total/m;
-    
-    % Return derivatives
-    dydt = [vx; vy; vz; acc(1); acc(2); acc(3)];
 end 

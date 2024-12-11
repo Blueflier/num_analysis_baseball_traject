@@ -11,7 +11,8 @@ dt = 0.001;  % Time step
 t_final = 1;  % Final time
 
 % Run simulation
-[t, x, y, z] = rungaKutta(x0, y0, z0, vx0, vy0, vz0, Cd, CL, phi, g, K, dt, t_final);
+[x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi);
+
 
 % Plot results
 plot3(x, y, z)
