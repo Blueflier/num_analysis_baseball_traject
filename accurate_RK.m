@@ -1,15 +1,19 @@
 function [x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi_spin)
-    % plotBaseballTrajectory - Calculates 3D baseball trajectory with aerodynamic effects
+    % accurate_RK - Calculates 3D baseball trajectory with aerodynamic effects
     % using 4th order Runge-Kutta integration
     %
     % Inputs:
-    %   x0, y0, z0     - Initial positions (m)
-    %   vx0, vy0, vz0  - Initial velocities (m/s)
+    %   x0, y0, z0     - Initial positions (ft)
+    %   vx0, vy0, vz0  - Initial velocities (ft/s)
     %   dt             - Time step (seconds)
     %   t_final        - Final time (seconds)
+    %   K              - Drag coefficient parameter
+    %   Cd             - Drag coefficient
+    %   CL             - Lift coefficient
+    %   phi_spin       - Spin angle (radians)
     %
     % Outputs:
-    %   x, y, z        - Position arrays over time
+    %   x, y, z        - Position arrays (ft)
     
     % Constants
     g = 32.174;        % Gravity acceleration (ft/s^2)
@@ -61,10 +65,6 @@ function [x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, 
             
             % dvz/dt: Z-acceleration
             dstate(6) = -K*Cd*v*x(6) + K*CL*v*x(4)*cos(phi_spin) - g;
-        else
-            dstate(2) = 0;
-            dstate(4) = 0;
-            dstate(6) = -g;
         end
     end
 end 
