@@ -1,4 +1,4 @@
-function [x, y, z] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az)
+function [x, y, z] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final)
     % plotBaseballTrajectory - Plots 3D baseball trajectory given initial conditions
     %
     % Inputs:
@@ -11,7 +11,7 @@ function [x, y, z] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, a
     
     % Initialize parameters
     dt = 0.001;          % Time step (seconds)
-    t = 0:dt:0.42;       % Time array adjusted for 98 MPH pitch
+    t = 0:dt:t_final;       % Time array adjusted for 98 MPH pitch
     
     % Initialize solution arrays
     n = length(t);

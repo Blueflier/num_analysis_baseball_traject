@@ -11,11 +11,11 @@ K = 0.005152949;
 
 % Simulation parameters
 dt = 0.001;      % Time step
-t_final = 0.42;   % Final time adjusted for 98 MPH pitch
+t_final = 0.5;   % Final time adjusted for 98 MPH pitch
 
 % Get trajectories from both methods
 [x1, y1, z1] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi);
-[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az);
+[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final);
 
 % Create plot
 figure;
@@ -54,7 +54,7 @@ K = 0.005316103;
 
 % Get trajectories from both methods for Pitch #2
 [x1, y1, z1] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi);
-[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az);
+[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final);
 
 % Plot both trajectories
 plot3(x1, y1, z1, 'b-', 'LineWidth', 2, 'DisplayName', 'accurate\_RK');
@@ -73,6 +73,55 @@ axis equal;
 % Display end points for comparison
 fprintf('\nPitch #2:\n');
 fprintf('accurate_RK end point: (%.3f, %.3f, %.3f)\n', x1(end), y1(end), z1(end));
+
+% Find indices where y is closest to 0 and -5
+[~, idx_home] = min(abs(y1));
+[~, idx_behind] = min(abs(y1 - (-5)));
+
+% Get x and z coordinates at these points
+x_home = x1(idx_home);
+z_home = z1(idx_home);
+x_behind = x1(idx_behind);
+z_behind = z1(idx_behind);
+
+% Create strike zone plot
+figure;
+hold on;
+
+% Set axis limits to match the example
+xlim([-3 3]);
+ylim([0 5]);
+
+% Plot ball locations
+scatter(x_home, z_home, 100, 'r', 'filled', 'DisplayName', 'At Home Plate');
+% scatter(x_behind, z_behind, 100, 'b', 'filled', 'DisplayName', 'Behind Plate');
+
+% Draw strike zone (approximate MLB strike zone)
+strike_zone_left = -1;    % 17 inches = ~1.417 ft, centered at 0
+strike_zone_right = 1;
+strike_zone_bottom = 1.5;     % Approximate bottom of strike zone
+strike_zone_top = 3.5;        % Approximate top of strike zone
+
+% Draw strike zone with thinner gray lines to match example
+rectangle('Position', [strike_zone_left, strike_zone_bottom, ...
+    strike_zone_right-strike_zone_left, strike_zone_top-strike_zone_bottom], ...
+    'EdgeColor', [0.7 0.7 0.7], 'LineWidth', 1);
+
+% Customize plot
+grid on;
+xlabel('Horizontal Location (in Feet)');
+ylabel('Vertical Location (in Feet)');
+title('Strike Zone Plot');
+
+% Adjust figure appearance
+set(gca, 'GridColor', [0.9 0.9 0.9], 'GridAlpha', 0.5);
+set(gca, 'Layer', 'top');  % Ensure grid is behind the data
+box on;
+
+% Print the coordinates
+fprintf('\nPitch #2 Locations:\n');
+fprintf('At home plate (y=0): x=%.3f ft, z=%.3f ft\n', x_home, z_home);
+fprintf('Behind plate (y=-5): x=%.3f ft, z=%.3f ft\n', x_behind, z_behind);
 
 % Create a third figure comparing both pitches
 figure;
@@ -96,10 +145,10 @@ K_2 = 0.005316103;
 
 % Calculate trajectories for both pitches
 [x1_p1, y1_p1, z1_p1] = accurate_RK(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, dt, t_final, K_1, Cd_1, CL_1, phi_1);
-[x2_p1, y2_p1, z2_p1] = plotBaseballTrajectory(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, ax_1, ay_1, az_1);
+[x2_p1, y2_p1, z2_p1] = plotBaseballTrajectory(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, ax_1, ay_1, az_1, t_final);
 
 [x1_p2, y1_p2, z1_p2] = accurate_RK(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, dt, t_final, K_2, Cd_2, CL_2, phi_2);
-[x2_p2, y2_p2, z2_p2] = plotBaseballTrajectory(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, ax_2, ay_2, az_2);
+[x2_p2, y2_p2, z2_p2] = plotBaseballTrajectory(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, ax_2, ay_2, az_2, t_final);
 
 % Plot all trajectories
 plot3(x1_p1, y1_p1, z1_p1, 'b-', 'LineWidth', 2, 'DisplayName', 'Pitch #1 accurate\_RK');
