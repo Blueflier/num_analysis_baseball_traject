@@ -5,17 +5,18 @@ ax = -19.268; ay = 30.713; az = -16.580;
 
 
 Cd = 0.3926485; CL = 0.255819;
-phi = 236.0038*pi/180;
+% phi = 236.0038*pi/180;
+phi = 4.119;
 g = 32.174;
 K = 0.005152949;
 
 % Simulation parameters
-dt = 0.001;      % Time step
+dt = 0.01;      % Time step
 t_final = 0.5;   % Final time adjusted for 98 MPH pitch
 
 % Get trajectories from both methods
 [x1, y1, z1] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi);
-[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final);
+[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final,dt);
 
 % Create plot
 figure;
@@ -54,7 +55,7 @@ K = 0.005316103;
 
 % Get trajectories from both methods for Pitch #2
 [x1, y1, z1] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, CL, phi);
-[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final);
+[x2, y2, z2] = plotBaseballTrajectory(x0, y0, z0, vx0, vy0, vz0, ax, ay, az, t_final,dt);
 
 % Plot both trajectories
 plot3(x1, y1, z1, 'b-', 'LineWidth', 2, 'DisplayName', 'accurate\_RK');
@@ -145,10 +146,10 @@ K_2 = 0.005316103;
 
 % Calculate trajectories for both pitches
 [x1_p1, y1_p1, z1_p1] = accurate_RK(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, dt, t_final, K_1, Cd_1, CL_1, phi_1);
-[x2_p1, y2_p1, z2_p1] = plotBaseballTrajectory(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, ax_1, ay_1, az_1, t_final);
+[x2_p1, y2_p1, z2_p1] = plotBaseballTrajectory(x0_1, y0_1, z0_1, vx0_1, vy0_1, vz0_1, ax_1, ay_1, az_1, t_final,dt);
 
 [x1_p2, y1_p2, z1_p2] = accurate_RK(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, dt, t_final, K_2, Cd_2, CL_2, phi_2);
-[x2_p2, y2_p2, z2_p2] = plotBaseballTrajectory(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, ax_2, ay_2, az_2, t_final);
+[x2_p2, y2_p2, z2_p2] = plotBaseballTrajectory(x0_2, y0_2, z0_2, vx0_2, vy0_2, vz0_2, ax_2, ay_2, az_2, t_final,dt);
 
 % Plot all trajectories
 plot3(x1_p1, y1_p1, z1_p1, 'b-', 'LineWidth', 2, 'DisplayName', 'Pitch #1 accurate\_RK');

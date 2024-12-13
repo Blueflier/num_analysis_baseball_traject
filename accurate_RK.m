@@ -59,10 +59,14 @@ function [x, y, z] = accurate_RK(x0, y0, z0, vx0, vy0, vz0, dt, t_final, K, Cd, 
             % Velocity derivatives with aerodynamic effects
             % dvx/dt: X-acceleration
             dstate(2) = -K*Cd*v*x(2) - K*CL*v*x(4)*sin(phi_spin);
+            % fprintf('dstate(2) = %.4f\n', dstate(2));  % Debug print with 4 decimal places
             
             % dvy/dt: Y-acceleration
             dstate(4) = -K*Cd*v*x(4) + K*CL*v*(x(2)*sin(phi_spin) - x(6)*cos(phi_spin));
             
+            % fprintf('dstate(4) = %.4f\n', dstate(4));  % Debug print with 4 decimal places
+
+
             % dvz/dt: Z-acceleration
             dstate(6) = -K*Cd*v*x(6) + K*CL*v*x(4)*cos(phi_spin) - g;
         end
